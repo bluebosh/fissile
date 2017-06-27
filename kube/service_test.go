@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/SUSE/fissile/model"
+	"github.com/SUSE/fissile/testhelpers"
 
 	"github.com/stretchr/testify/assert"
 	yaml "gopkg.in/yaml.v2"
@@ -93,7 +94,7 @@ func TestServiceOK(t *testing.T) {
 	if !assert.NoError(yaml.Unmarshal([]byte(expectedYAML), &expected)) {
 		return
 	}
-	_ = isYAMLSubset(assert, expected, actual, []string{})
+	_ = testhelpers.IsYAMLSubset(assert, expected, actual)
 }
 
 func TestHeadlessServiceOK(t *testing.T) {
@@ -147,5 +148,5 @@ func TestHeadlessServiceOK(t *testing.T) {
 	if !assert.NoError(yaml.Unmarshal([]byte(expectedYAML), &expected)) {
 		return
 	}
-	_ = isYAMLSubset(assert, expected, actual, []string{})
+	_ = testhelpers.IsYAMLSubset(assert, expected, actual)
 }
