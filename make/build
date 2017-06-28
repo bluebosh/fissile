@@ -12,7 +12,7 @@ set -o errexit -o nounset
 
 ${GIT_ROOT}/make/bindata
 
-OSES="linux darwin"
+OSES="${OSES:-linux darwin}"
 GOARCH=${GOARCH:-$(go env GOARCH)}
 
 for OS in ${OSES}; do
