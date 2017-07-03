@@ -94,7 +94,7 @@ chmod 775 /var/vcap/sys/run
 
 # Fix permissions
 chmod 640 /var/log/messages
-chmod 1730 /var/spool/cron/tabs/
+chmod 1730 /var/spool/cron/crontabs/
 
 {{ if eq .role.Type "bosh-task" }}
     # Start rsyslog and cron
