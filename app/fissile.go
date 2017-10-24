@@ -681,9 +681,20 @@ func (f *Fissile) LoadReleases(releasePaths, releaseNames, releaseVersions []str
 			releaseVersion = releaseVersions[idx]
 		}
 
-		release, err := model.NewDevRelease(releasePath, releaseName, releaseVersion, cacheDir)
-		if err != nil {
-			return fmt.Errorf("Error loading release information: %s", err.Error())
+		var release *model.Release
+		var err error
+		found, _ := isFinalReleasePath(releasePath)
+		fmt.Printf("===========debug isFinalReleasePath(releasePath)", releasePath, found)
+		if _, err = isFinalReleasePath(releasePath); err == nil {
+			release, err = model.NewFinalRelease(releasePath, releaseName, releaseVersion, "final")
+			if err != nil {
+				return fmt.Errorf("Error loading final release information: %s", err.Error())
+			}
+		} else {
+			release, err = model.NewDevRelease(releasePath, releaseName, releaseVersion, cacheDir)
+			if err != nil {
+				return fmt.Errorf("Error loading dev release information: %s", err.Error())
+			}
 		}
 
 		releases[idx] = release
@@ -692,6 +703,40 @@ func (f *Fissile) LoadReleases(releasePaths, releaseNames, releaseVersions []str
 	f.releases = releases
 
 	return nil
+}
+
+func isFinalReleasePath(releasePath string) (bool, error){
+	if err := util.ValidatePath(releasePath, true, "release directory"); err != nil {
+		fmt.Printf("============debug validate release directory")
+		return false, err
+	}
+
+	if err := util.ValidatePath(filepath.Join(releasePath, "jobs"), true, "release 'jobs' directory"); err != nil {
+		fmt.Printf("============debug validate jobs directory")
+		return false, err
+	}
+
+	if err := util.ValidatePath(filepath.Join(releasePath, "packages"), true, "release 'packages' directory"); err != nil {
+		fmt.Printf("============debug validate packages directory")
+		return false, err
+	}
+
+	if err := util.ValidatePath(filepath.Join(releasePath, "release.MF"), false, "release 'release.MF' file"); err != nil {
+		fmt.Printf("============debug validate release.MF")
+		return false, err
+	}
+
+	if err := util.ValidatePath(filepath.Join(releasePath, "LICENSE"), false, "release 'LICENSE' file"); err != nil {
+		fmt.Printf("============debug validate LICENSE")
+		return false, err
+	}
+
+	if err := util.ValidatePath(filepath.Join(releasePath, "NOTICE"), false, "release 'NOTICE' file"); err != nil {
+		fmt.Printf("============debug validate NOTICE")
+		return false, err
+	}
+
+	return true, nil
 }
 
 // getReleasesByName returns all named releases, or all releases if no names are given

@@ -94,6 +94,39 @@ func (r *Release) loadMetadata() (err error) {
 	return nil
 }
 
+func (r *Release) loadFinalReleaseMetadata() (err error) {
+	defer func() {
+		if p := recover(); p != nil {
+			err = fmt.Errorf("Error trying to load release %s metadata from YAML manifest %s: %s", r.Name, filepath.Join(r.Path, "Release.MF"), p)
+		}
+	}()
+
+	manifestContents, err := ioutil.ReadFile(filepath.Join(r.Path, "Release.MF"))
+	if err != nil {
+		return err
+	}
+
+	// Psych (the Ruby YAML serializer) will incorrectly emit "!binary" when it means "!!binary".
+	// This causes the data to be read incorrectly (not base64 decoded), which causes integrity checks to fail.
+	// See https://github.com/tenderlove/psych/blob/c1decb1fef5/lib/psych/visitors/yaml_tree.rb#L309
+	manifestContents = yamlBinaryRegexp.ReplaceAll(
+		manifestContents,
+		[]byte("$1!!binary |-\n"),
+	)
+
+	err = yaml.Unmarshal([]byte(manifestContents), &r.manifest)
+	if err != nil {
+		return err
+	}
+
+	r.CommitHash = r.manifest["commit_hash"].(string)
+	r.UncommittedChanges = r.manifest["uncommitted_changes"].(bool)
+	r.Name = r.manifest["name"].(string)
+	r.Version = r.manifest["version"].(string)
+
+	return nil
+}
+
 // LookupPackage will find a package within a BOSH release
 func (r *Release) LookupPackage(packageName string) (*Package, error) {
 	for _, pkg := range r.Packages {
