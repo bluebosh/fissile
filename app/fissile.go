@@ -326,7 +326,7 @@ func (f *Fissile) Compile(stemcellImageName string, targetPath, roleManifestPath
 
 	f.UI.Println(color.GreenString("Compiling packages for dev releases:"))
 	for _, release := range releases {
-		f.UI.Printf("         %s (%s)\n", color.YellowString(release.Name), color.MagentaString(release.Version))
+		f.UI.Printf("         %s (%s)\n", color. YellowString(release.Name), color.MagentaString(release.Version))
 	}
 
 	var comp *compilator.Compilator
@@ -697,6 +697,10 @@ func (f *Fissile) LoadReleases(releasePaths, releaseNames, releaseVersions []str
 			}
 		}
 
+		fmt.Printf("===========debug loaded release",releaseName, release.Jobs.Len(), release.Packages.Len())
+		for _, job := range release.Jobs {
+			fmt.Printf("==============debug job.packages", job.Name,job.Fingerprint, job.Packages.Len())
+		}
 		releases[idx] = release
 	}
 

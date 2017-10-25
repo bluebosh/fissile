@@ -118,7 +118,13 @@ func (p *Package) loadPackageInfo() (err error) {
 	p.Version = p.packageReleaseInfo["version"].(string)
 	p.Fingerprint = p.packageReleaseInfo["fingerprint"].(string)
 	p.SHA1 = p.packageReleaseInfo["sha1"].(string)
-	p.Path = p.packageArchivePath()
+	if p.Release.DevBOSHCacheDir == "final" {
+		p.Path = filepath.Join(p.Release.Path, "packages", p.Name + ".tgz")
+		fmt.Printf("=======loadPackageInfo final", p.Path)
+	} else {
+		p.Path = p.packageArchivePath()
+		fmt.Printf("=======loadPackageInfo", p.Path)
+	}
 
 	return nil
 }

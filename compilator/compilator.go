@@ -253,15 +253,21 @@ func (c *Compilator) gatherPackages(releases []*model.Release, roles model.Roles
 			releasePackages = release.Packages
 		}
 
+		fmt.Printf("========release roles releasePackages %s",release.Name, roles.Len(), len(releasePackages))
 		// .. and collect for compilation. (%%) Here we ensure
 		// via the source fingerprints that only the first of
 		// several equivalent packages is taken.
 		for _, pkg := range releasePackages {
+			fmt.Printf("============pkg", pkg.Name, pkg.Fingerprint, pkg.Dependencies)
+			kn, _ :=c.signalDependencies[pkg.Fingerprint]
+
+			fmt.Printf("============kn", kn)
 			if _, known := c.signalDependencies[pkg.Fingerprint]; !known {
 				c.signalDependencies[pkg.Fingerprint] = make(chan struct{})
 				packages = append(packages, pkg)
 			}
 		}
+		fmt.Printf("========gatherPackages %s", packages)
 	}
 
 	return packages
@@ -716,6 +722,7 @@ func (c *Compilator) removeCompiledPackages(packages model.Packages, verbose boo
 		}
 	}
 
+	fmt.Printf("==========culledPackages", culledPackages)
 	return culledPackages, nil
 }
 
@@ -729,17 +736,22 @@ func (c *Compilator) gatherPackagesFromRoles(release *model.Release, roles model
 	// Find the initial list of packages to examine (all packages of the release in the manifest)
 	for _, role := range roles {
 		for _, job := range role.Jobs {
+			fmt.Printf("============job.Packages ", job.Packages.Len())
 			for _, pkg := range job.Packages {
 				if pkg.Release.Name == release.Name {
 					pendingPackages.PushBack(pkg)
+					fmt.Printf("============role, pendingPackages", role.Name, pendingPackages.Len())
 				}
 			}
 		}
 	}
 
+	fmt.Printf("============pendingPackages", pendingPackages.Len())
+
 	// For each package, add it to the result list, and check its dependencies
 	for elem := pendingPackages.Front(); elem != nil; elem = elem.Next() {
 		pkg := elem.Value.(*model.Package)
+		fmt.Printf("============listedPackages[pkg.Name]", listedPackages[pkg.Name])
 		if listedPackages[pkg.Name] {
 			// Package is already added (via another package's dependencies)
 			continue
@@ -751,5 +763,6 @@ func (c *Compilator) gatherPackagesFromRoles(release *model.Release, roles model
 		}
 	}
 
+	fmt.Printf("============resultPackages", resultPackages)
 	return resultPackages
 }

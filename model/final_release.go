@@ -2,12 +2,7 @@ package model
 
 import (
 	"fmt"
-	//"io/ioutil"
 	"path/filepath"
-
-	//"github.com/SUSE/fissile/util"
-
-	//"github.com/cppforlife/go-semi-semantic/version"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 )
@@ -106,54 +101,6 @@ func (r *Release) getFinalReleaseVersion() (ver string, err error) {
 	return version, nil
 }
 
-//func (r *Release) validateDevPathStructure() error {
-//	if err := util.ValidatePath(r.Path, true, "release directory"); err != nil {
-//		return err
-//	}
-//
-//	if err := util.ValidatePath(r.getDevReleasesDir(), true, "release 'dev_releases' directory"); err != nil {
-//		return err
-//	}
-//
-//	if err := util.ValidatePath(r.getDevReleaseConfigDir(), true, "release config directory"); err != nil {
-//		return err
-//	}
-//
-//	return util.ValidatePath(r.getDevReleaseFinalConfigFile(), false, "release final config file")
-//}
-//
-//func (r *Release) validateSpecificDevReleasePathStructure() error {
-//	if err := util.ValidatePath(r.getDevReleaseManifestsDir(), true, "release dev manifests directory"); err != nil {
-//		return err
-//	}
-//
-//	return util.ValidatePath(r.getDevReleaseIndexPath(), false, "release index file")
-//}
-//
-//func (r *Release) getDevReleaseManifestFilename() string {
-//	return fmt.Sprintf("%s-%s.yml", r.Name, r.Version)
-//}
-//
-//func (r *Release) getDevReleaseManifestsDir() string {
-//	return filepath.Join(r.getDevReleasesDir(), r.Name)
-//}
-//
-//func (r *Release) getDevReleaseIndexPath() string {
-//	return filepath.Join(r.getDevReleaseManifestsDir(), "index.yml")
-//}
-//
-//func (r *Release) getDevReleasesDir() string {
-//	return filepath.Join(r.Path, "dev_releases")
-//}
-//
-//func (r *Release) getDevReleaseConfigDir() string {
-//	return filepath.Join(r.Path, "config")
-//}
-
-//func (r *Release) getDevReleaseFinalConfigFile() string {
-//	return filepath.Join(r.getDevReleaseConfigDir(), "final.yml")
-//}
-//
 func (r *Release) getReleaseConfigFile() string {
 	return filepath.Join(r.Path, "release.MF")
 }

@@ -65,14 +65,8 @@ func newJob(release *Release, jobReleaseInfo map[interface{}]interface{}) (*Job,
 		return nil, err
 	}
 
-	if job.Release.DevBOSHCacheDir == "final" {
-		if err := job.loadFinalJobInfo(); err != nil {
-			return nil, err
-		}
-	} else {
-		if err := job.loadJobInfo(); err != nil {
-			return nil, err
-		}
+	if err := job.loadJobSpec(); err != nil {
+		return nil, err
 	}
 
 	return job, nil
@@ -141,23 +135,11 @@ func (j *Job) loadJobInfo() (err error) {
 	j.Version = j.jobReleaseInfo["version"].(string)
 	j.Fingerprint = j.jobReleaseInfo["fingerprint"].(string)
 	j.SHA1 = j.jobReleaseInfo["sha1"].(string)
-	j.Path = j.jobArchivePath()
-
-	return nil
-}
-
-func (j *Job) loadFinalJobInfo() (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("Error trying to load job information: %s", r)
-		}
-	}()
-
-	j.Name = j.jobReleaseInfo["name"].(string)
-	j.Version = j.jobReleaseInfo["version"].(string)
-	j.Fingerprint = j.jobReleaseInfo["fingerprint"].(string)
-	j.SHA1 = j.jobReleaseInfo["sha1"].(string)
-	j.Path = filepath.Join(j.Release.Path, "jobs")
+	if j.Release.DevBOSHCacheDir == "final" {
+		j.Path = filepath.Join(j.Release.Path, "jobs", j.Name + ".tgz")
+	} else {
+		j.Path = j.jobArchivePath()
+	}
 
 	return nil
 }
@@ -222,6 +204,8 @@ func (j *Job) loadJobSpec() (err error) {
 
 	j.Description = jobSpec.Description
 
+	fmt.Printf("======================jobSpec.Packages", len(jobSpec.Packages))
+
 	for _, pkgName := range jobSpec.Packages {
 		dependency, err := j.Release.LookupPackage(pkgName)
 		if err != nil {
@@ -230,6 +214,7 @@ func (j *Job) loadJobSpec() (err error) {
 
 		j.Packages = append(j.Packages, dependency)
 	}
+	fmt.Printf("======================j.Packages", len(j.Packages), j.Packages)
 
 	for source, destination := range jobSpec.Templates {
 		templateFile := filepath.Join(jobDir, "templates", source)

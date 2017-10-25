@@ -175,7 +175,7 @@ func (r *Release) loadPackages() (err error) {
 			err = fmt.Errorf("Error trying to load release %s packages from YAML manifest: %s", r.Name, p)
 		}
 	}()
-
+	fmt.Printf("=============loadPackages")
 	if packages, ok := r.manifest["packages"].([]interface{}); ok {
 		for _, pkg := range packages {
 			p, err := newPackage(r, pkg.(map[interface{}]interface{}))
@@ -186,6 +186,8 @@ func (r *Release) loadPackages() (err error) {
 			r.Packages = append(r.Packages, p)
 		}
 	}
+
+	fmt.Printf("=============sum release packages", r.Packages.Len())
 
 	return nil
 }
