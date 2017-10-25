@@ -14,6 +14,7 @@ func NewFinalRelease(path, releaseName, version, boshCacheDir string) (*Release,
 		Name:            releaseName,
 		Version:         version,
 		DevBOSHCacheDir: boshCacheDir,
+		FinalRelease:	 true,
 	}
 
 	if releaseName == "" {
@@ -34,7 +35,7 @@ func NewFinalRelease(path, releaseName, version, boshCacheDir string) (*Release,
 		release.Version = version
 	}
 
-	if err := release.loadFinalReleaseMetadata(); err != nil {
+	if err := release.loadReleaseMetadata(); err != nil {
 		return nil, err
 	}
 
@@ -61,7 +62,7 @@ func (r *Release) getFinalReleaseName() (ver string, err error) {
 	var releaseConfig map[interface{}]interface{}
 	var name string
 
-	releaseConfigContent, err := ioutil.ReadFile(r.getReleaseConfigFile())
+	releaseConfigContent, err := ioutil.ReadFile(r.getFinalReleaseConfigFile())
 	if err != nil {
 		return "", err
 	}
@@ -83,7 +84,7 @@ func (r *Release) getFinalReleaseVersion() (ver string, err error) {
 	var releaseConfig map[interface{}]interface{}
 	var version string
 
-	releaseConfigContent, err := ioutil.ReadFile(r.getReleaseConfigFile())
+	releaseConfigContent, err := ioutil.ReadFile(r.getFinalReleaseConfigFile())
 	if err != nil {
 		return "", err
 	}
@@ -101,6 +102,10 @@ func (r *Release) getFinalReleaseVersion() (ver string, err error) {
 	return version, nil
 }
 
-func (r *Release) getReleaseConfigFile() string {
+func (r *Release) getFinalReleaseManifestFilename() string {
+	return "release.MF"
+}
+
+func (r *Release) getFinalReleaseConfigFile() string {
 	return filepath.Join(r.Path, "release.MF")
 }
