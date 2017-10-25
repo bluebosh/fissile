@@ -69,10 +69,6 @@ func newJob(release *Release, jobReleaseInfo map[interface{}]interface{}) (*Job,
 		return nil, err
 	}
 
-	if err := job.loadJobSpec(); err != nil {
-		return nil, err
-	}
-
 	return job, nil
 }
 
