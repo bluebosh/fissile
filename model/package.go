@@ -118,13 +118,7 @@ func (p *Package) loadPackageInfo() (err error) {
 	p.Version = p.packageReleaseInfo["version"].(string)
 	p.Fingerprint = p.packageReleaseInfo["fingerprint"].(string)
 	p.SHA1 = p.packageReleaseInfo["sha1"].(string)
-	if p.Release.DevBOSHCacheDir == "final" {
-		p.Path = filepath.Join(p.Release.Path, "packages", p.Name + ".tgz")
-		fmt.Printf("=======loadPackageInfo final", p.Path)
-	} else {
-		p.Path = p.packageArchivePath()
-		fmt.Printf("=======loadPackageInfo", p.Path)
-	}
+	p.Path = p.packageArchivePath()
 
 	return nil
 }
@@ -150,7 +144,11 @@ func (p *Package) loadPackageDependencies() (err error) {
 }
 
 func (p *Package) packageArchivePath() string {
-	return filepath.Join(p.Release.DevBOSHCacheDir, p.SHA1)
+	if p.Release.FinalRelease {
+		return filepath.Join(p.Release.Path, "packages", p.Name + ".tgz")
+	} else {
+		return filepath.Join(p.Release.DevBOSHCacheDir, p.SHA1)
+	}
 }
 
 // GetTargetPackageSourcesDir returns the path to the sources of the
