@@ -8,34 +8,25 @@ import (
 )
 
 // NewFinalRelease will create an instance of a BOSH final release
-func NewFinalRelease(path, releaseName, version, boshCacheDir string) (*Release, error) {
-	release := &Release{
+func NewFinalRelease(path string) (release *Release, err error) {
+	release = &Release{
 		Path:            path,
-		Name:            releaseName,
-		Version:         version,
-		DevBOSHCacheDir: boshCacheDir,
+		Name:            "",
+		Version:         "",
 		FinalRelease:	 true,
 	}
 
-	if releaseName == "" {
-		releaseName, err := release.getFinalReleaseName()
-		if err != nil {
-			return nil, err
-		}
-
-		release.Name = releaseName
+	release.Name, err = release.getFinalReleaseName()
+	if err != nil {
+		return nil, err
 	}
 
-	if version == "" {
-		version, err := release.getFinalReleaseVersion()
-		if err != nil {
-			return nil, err
-		}
-
-		release.Version = version
+	release.Version, err = release.getFinalReleaseVersion()
+	if err != nil {
+		return nil, err
 	}
 
-	if err := release.loadReleaseMetadata(); err != nil {
+	if err := release.loadMetadata(); err != nil {
 		return nil, err
 	}
 
@@ -58,9 +49,8 @@ func NewFinalRelease(path, releaseName, version, boshCacheDir string) (*Release,
 	return release, nil
 }
 
-func (r *Release) getFinalReleaseName() (ver string, err error) {
+func (r *Release) getFinalReleaseName() (name string, err error) {
 	var releaseConfig map[interface{}]interface{}
-	var name string
 
 	releaseConfigContent, err := ioutil.ReadFile(r.getFinalReleaseConfigFile())
 	if err != nil {
@@ -72,17 +62,16 @@ func (r *Release) getFinalReleaseName() (ver string, err error) {
 	}
 
 	if value, ok := releaseConfig["name"]; !ok {
-			return "", fmt.Errorf("name not exists in the release.MF file for release: %s", r.Path)
+		return "", fmt.Errorf("name does not exist in release.MF file for release: %s", r.Path)
 	} else if name, ok = value.(string); !ok {
-		return "", fmt.Errorf("name was not a string in release: %s, type: %T, value: %v", r.Path, value, value)
+		return "", fmt.Errorf("name was not a string in release.MF: %s, type: %T, value: %v", r.Path, value, value)
 	}
 
 	return name, nil
 }
 
-func (r *Release) getFinalReleaseVersion() (ver string, err error) {
+func (r *Release) getFinalReleaseVersion() (version string, err error) {
 	var releaseConfig map[interface{}]interface{}
-	var version string
 
 	releaseConfigContent, err := ioutil.ReadFile(r.getFinalReleaseConfigFile())
 	if err != nil {
@@ -94,9 +83,9 @@ func (r *Release) getFinalReleaseVersion() (ver string, err error) {
 	}
 
 	if value, ok := releaseConfig["version"]; !ok {
-		return "", fmt.Errorf("version not exists in the release.MF file for release: %s", r.Path)
+		return "", fmt.Errorf("version does not exist in release.MF file for release: %s", r.Name)
 	} else if version, ok = value.(string); !ok {
-		return "", fmt.Errorf("version was not a string in release: %s, type: %T, value: %v", r.Path, value, value)
+		return "", fmt.Errorf("version is not a string in release.MF: %s, type: %T, value: %v", r.Name, value, value)
 	}
 
 	return version, nil

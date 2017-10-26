@@ -47,7 +47,7 @@ func NewDevRelease(path, releaseName, version, boshCacheDir string) (*Release, e
 		release.Version = version
 	}
 
-	if err := release.loadReleaseMetadata(); err != nil {
+	if err := release.loadMetadata(); err != nil {
 		return nil, err
 	}
 

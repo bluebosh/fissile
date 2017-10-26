@@ -684,7 +684,8 @@ func (f *Fissile) LoadReleases(releasePaths, releaseNames, releaseVersions []str
 		var release *model.Release
 		var err error
 		if _, err = isFinalReleasePath(releasePath); err == nil {
-			release, err = model.NewFinalRelease(releasePath, releaseName, releaseVersion, "final")
+			// For final releases, only can use release name and version defined in release.MF, cannot specify them through flags.
+			release, err = model.NewFinalRelease(releasePath)
 			if err != nil {
 				return fmt.Errorf("Error loading final release information: %s", err.Error())
 			}
