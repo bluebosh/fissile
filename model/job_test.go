@@ -48,7 +48,7 @@ func TestJob(t *testing.T) {
 	}
 
 	ntpFinalReleasePath := filepath.Join(workDir, "../test-assets/ntp-final-release")
-	finalRelease, err := NewFinalRelease(ntpFinalReleasePath, "", "", "")
+	finalRelease, err := NewFinalRelease(ntpFinalReleasePath)
 	assert.NoError(err)
 
 	finalJobPath := filepath.Join(ntpFinalReleasePath, "jobs", finalRelease.Jobs[0].Name + ".tgz")
@@ -71,7 +71,6 @@ func TestJob(t *testing.T) {
 	t.Run("Dev release testJobLinksOk", testJobLinksOk(devRelease))
 	t.Run("Dev release testJobsProperties", testJobsProperties(devRelease))
 
-
 	t.Run("Final release testJobInfoOk", testJobInfoOk(finalRelease, finalJobInfo))
 	t.Run("Final release testJobExtractOk", testJobExtractOk(finalRelease))
 	t.Run("Final release testJobSha1Ok", testJobSha1Ok(finalRelease))
@@ -82,7 +81,6 @@ func TestJob(t *testing.T) {
 	t.Run("Final release testFinalJobPropertiesOk", testFinalJobPropertiesOk(finalRelease))
 	t.Run("Final release testGetJobPropertyNotOk", testGetJobPropertyNotOk(finalRelease, 1))
 	t.Run("Final release testFinalJobsProperties", testFinalJobsProperties(finalRelease))
-
 }
 
 func testJobInfoOk(fakeRelease *Release, jobInfo JobInfo) func(*testing.T) {
@@ -90,12 +88,10 @@ func testJobInfoOk(fakeRelease *Release, jobInfo JobInfo) func(*testing.T) {
 		assert := assert.New(t)
 
 		assert.Len(fakeRelease.Jobs, 1)
-
 		assert.Equal("ntpd", fakeRelease.Jobs[0].Name)
 		assert.Equal(jobInfo.Fingerprint, fakeRelease.Jobs[0].Version)
 		assert.Equal(jobInfo.Version, fakeRelease.Jobs[0].Fingerprint)
 		assert.Equal(jobInfo.SHA1, fakeRelease.Jobs[0].SHA1)
-
 		assert.Equal(jobInfo.Path, fakeRelease.Jobs[0].Path)
 
 		err := util.ValidatePath(jobInfo.Path, false, "")
@@ -106,6 +102,7 @@ func testJobInfoOk(fakeRelease *Release, jobInfo JobInfo) func(*testing.T) {
 func testJobSha1Ok(fakeRelease *Release) func(*testing.T) {
 	return func(t *testing.T) {
 		assert := assert.New(t)
+
 		assert.Len(fakeRelease.Jobs, 1)
 		assert.Nil(fakeRelease.Jobs[0].ValidateSHA1())
 	}
@@ -114,11 +111,11 @@ func testJobSha1Ok(fakeRelease *Release) func(*testing.T) {
 func testJobSha1NotOk(fakeRelease *Release) func(*testing.T) {
 	return func(t *testing.T) {
 		assert := assert.New(t)
+
 		assert.Len(fakeRelease.Jobs, 1)
 
 		// Mess up the manifest signature
 		fakeRelease.Jobs[0].SHA1 += "foo"
-
 		assert.NotNil(fakeRelease.Jobs[0].ValidateSHA1())
 
 	}
@@ -127,6 +124,7 @@ func testJobSha1NotOk(fakeRelease *Release) func(*testing.T) {
 func testJobExtractOk(fakeRelease *Release) func(*testing.T) {
 	return func(t *testing.T) {
 		assert := assert.New(t)
+
 		assert.Len(fakeRelease.Jobs, 1)
 
 		tempDir, err := ioutil.TempDir("", "fissile-tests")
@@ -144,6 +142,7 @@ func testJobExtractOk(fakeRelease *Release) func(*testing.T) {
 func testJobPackagesOk(fakeRelease *Release, packageName string) func(*testing.T) {
 	return func(t *testing.T) {
 		assert := assert.New(t)
+
 		assert.Len(fakeRelease.Jobs, 1)
 		assert.Len(fakeRelease.Jobs[0].Packages, 1)
 		assert.Equal(packageName, fakeRelease.Jobs[0].Packages[0].Name)
@@ -155,7 +154,6 @@ func testJobTemplatesOk(fakeRelease *Release) func(*testing.T) {
 		assert := assert.New(t)
 
 		assert.Len(fakeRelease.Jobs, 1)
-
 		assert.Len(fakeRelease.Jobs[0].Templates, 2)
 
 		assert.Contains([]string{"ctl.sh", "ntp.conf.erb"}, fakeRelease.Jobs[0].Templates[0].SourcePath)
@@ -171,7 +169,6 @@ func testJobPropertiesOk(fakeRelease *Release) func(*testing.T) {
 		assert := assert.New(t)
 
 		assert.Len(fakeRelease.Jobs, 1)
-
 		assert.Len(fakeRelease.Jobs[0].Properties, 3)
 
 		assert.Equal("ntp_conf", fakeRelease.Jobs[0].Properties[0].Name)
@@ -186,6 +183,7 @@ func testJobPropertiesOk(fakeRelease *Release) func(*testing.T) {
 func testFinalJobPropertiesOk(fakeRelease *Release) func(*testing.T) {
 	return func(t *testing.T) {
 		assert := assert.New(t)
+
 		assert.Len(fakeRelease.Jobs, 1)
 		assert.Len(fakeRelease.Jobs[0].Properties, 1)
 		assert.Equal("ntp_conf", fakeRelease.Jobs[0].Properties[0].Name)
@@ -196,6 +194,7 @@ func testFinalJobPropertiesOk(fakeRelease *Release) func(*testing.T) {
 func testGetJobPropertyOk(fakeRelease *Release, jobPropertyLen int) func(*testing.T) {
 	return func(t *testing.T) {
 		assert := assert.New(t)
+
 		assert.Len(fakeRelease.Jobs, 1)
 		assert.Len(fakeRelease.Jobs[0].Properties, jobPropertyLen)
 		property, err := fakeRelease.Jobs[0].getProperty("ntp_conf")
@@ -208,6 +207,7 @@ func testGetJobPropertyOk(fakeRelease *Release, jobPropertyLen int) func(*testin
 func testGetJobPropertyNotOk(fakeRelease *Release, jobPropertyLen int) func(*testing.T) {
 	return func(t *testing.T) {
 		assert := assert.New(t)
+
 		assert.Len(fakeRelease.Jobs, 1)
 		assert.Len(fakeRelease.Jobs[0].Properties, jobPropertyLen)
 		_, err := fakeRelease.Jobs[0].getProperty("foo")
